@@ -1,0 +1,115 @@
+﻿@page "/personas/nueva"
+@page "/personas/editar/{Id:int}"
+@rendermode InteractiveServer
+@inject NavigationManager _navigator;
+@inject IRepositorioPersonas _repositorio;
+
+<h2>Renta de Automovil</h2>
+
+<EditForm Model="_persona" FormName="frmPersona" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <label for="txtNombre" class="col-2 col-form-label">Nombre</label>
+        <div class="col-10">
+            <InputText id="txtNombre" class="form-control" @bind-Value="_persona.Nombre" />
+            <ValidationMessage For="()=>_persona.Nombre" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtCorreo" class="col-2 col-form-label">Correo</label>
+        <div class="col-10">
+            <InputText id="txtCorreo" class="form-control" @bind-Value="_persona.Correo" />
+            <ValidationMessage For="()=>_persona.Correo" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtTelefono" class="col-2 col-form-label">Teléfono</label>
+        <div class="col-10">
+            <InputText id="txtTelefono" class="form-control" @bind-Value="_persona.Telefono" />
+            <ValidationMessage For="()=>_persona.Telefono" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtDireccion" class="col-2 col-form-label">Diección</label>
+        <div class="col-10">
+            <InputText id="txtDireccion" class="form-control" @bind-Value="_persona.Direccion" />
+            <ValidationMessage For="()=>_persona.Direccion" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtCiudad" class="col-2 col-form-label">Ciudad</label>
+        <div class="col-10">
+            <InputText id="txtCiudad" class="form-control" @bind-Value="_persona.Ciudad" />
+            <ValidationMessage For="()=>_persona.Ciudad" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtDias" class="col-2 col-form-label">Dias</label>
+        <div class="col-10">
+            <InputText id="txt" class="form-control" @bind-Value="_persona.Dias" />
+            <ValidationMessage For="()=>_persona.Dias" />
+        </div>
+    </div>
+
+
+    <div class="row mb-3">
+        <label for="txtAutomovil" class="col-2 col-form-label">Automovil</label>
+        <div class="col-sm-10">
+            <InputSelect class="form-select" @bind-Value="_persona.AutomovilId">
+                <option value="0" disabled="disabled">Seleccionar</option>
+                @foreach (Automovil automovil in _automovil)
+                {
+                    <option value="@automovil.Id">@automovil.Modelo</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="()=>_persona.AutomovilId" />
+        </div>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button class="btn btn-danger ms-3" @onclick="Cancelar" @onclick:preventDefault>Cancelar</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private string _mensaje = "";
+    private Persona? _persona = new();
+    private List<Automovil> _automovil = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _automovil = await _repositorio.GetAutomovil();
+
+        if (Id > 0)
+        {
+            _persona = await _repositorio.Get(Id);
+            _mensaje = "Modificar";
+        }
+        else
+        {
+            _mensaje = "Nueva";
+        }
+    }
+
+    private async void Guardar()
+    {
+        if (Id > 0)
+        {
+            await _repositorio.Update(Id, _persona!);
+        }
+        else
+        {
+            await _repositorio.Add(_persona!);
+        }
+        Cancelar();
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("/personas");
+    }
+}

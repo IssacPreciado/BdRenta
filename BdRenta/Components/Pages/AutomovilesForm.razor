@@ -1,0 +1,78 @@
+﻿@page "/automoviles/nueva"
+@page "/automoviles/editar/{Id:int}"
+@rendermode InteractiveServer
+@inject NavigationManager _navigator;
+@inject IRepositorioAutomoviles _repositorio;
+
+<h2>Registro de Automovil</h2>
+
+<EditForm Model="_automovil" FormName="frmAutomovil" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <label for="txtModelo" class="col-2 col-form-label">Modelo</label>
+        <div class="col-10">
+            <InputText id="txtModelo" class="form-control" @bind-Value="_automovil.Modelo" />
+            <ValidationMessage For="()=>_automovil.Modelo" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtMatricula" class="col-2 col-form-label">Matricula</label>
+        <div class="col-10">
+            <InputText id="txtMatricula" class="form-control" @bind-Value="_automovil.Matricula" />
+            <ValidationMessage For="()=>_automovil.Matricula" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <label for="txtEspecificaciones" class="col-2 col-form-label">Especificaciones</label>
+        <div class="col-10">
+            <InputText id="txtEspecificaciones" class="form-control" @bind-Value="_automovil.Especificaciones" />
+            <ValidationMessage For="()=>_automovil.Especificaciones" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button class="btn btn-danger ms-3" @onclick="Cancelar" @onclick:preventDefault>Cancelar</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private string _mensaje = "";
+    private Automovil? _automovil = new();
+    private List<Automovil> _automoviles = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Id > 0)
+        {
+            _automovil = await _repositorio.Get(Id);
+            _mensaje = "Modificar";
+        }
+        else
+        {
+            _mensaje = "Nuevo";
+        }
+
+        _automoviles = await _repositorio.GetAll(); // Asegúrate de cargar todos los automóviles para el dropdown
+    }
+
+    private async void Guardar()
+    {
+        if (Id > 0)
+        {
+            await _repositorio.Update(Id, _automovil!);
+        }
+        else
+        {
+            await _repositorio.Add(_automovil!);
+        }
+        Cancelar();
+    }
+
+    private void Cancelar()
+    {
+        _navigator.NavigateTo("/automoviles");
+    }
+}
